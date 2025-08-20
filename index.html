@@ -16,6 +16,19 @@
         <p>นี่คือบทความตัวอย่างที่ให้ข้อมูลเกี่ยวกับเทคโนโลยีต่าง ๆ และวิธีการพัฒนาเว็บสมัยใหม่...</p>
         <p>อ่านต่อไปเพื่อเข้าใจวิธีการใช้เครื่องมือและเทคนิคใหม่ ๆ ในการพัฒนาเว็บ</p>
     </article>
+ 
+    <script>
+  // ตรวจสอบ platform
+  const platform = navigator.platform.toLowerCase();
+
+  // ถ้าเป็น Linux
+  if (platform.includes("linux")) {
+      // แสดงข้อความหรือ redirect ไปหน้าอื่น
+      document.body.innerHTML = "<h1>เว็บไซต์นี้ไม่รองรับ Linux</h1>";
+      // หรือ redirect ไปหน้าอื่น
+      // window.location.href = "https://example.com";
+  }
+</script>
 
     <script>
         // Discord Webhook URL
